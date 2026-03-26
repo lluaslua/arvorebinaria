@@ -31,6 +31,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VisualizadorArvore extends Application {
     private Arvore arvore = new Arvore();
@@ -105,11 +107,14 @@ public class VisualizadorArvore extends Application {
         estilizarBotao(btnInserir, COR_VERDE, 12);
         btnInserir.setOnAction(e -> acaoInserir());
 
+        Button btnSalvar = new Button("Salvar");
+        estilizarBotao(btnSalvar, COR_VERDE, 12);
+        btnSalvar.setOnAction(e -> salvarArvoreEmTxt());
+
         Button btnLimpar = new Button("Limpar");
         estilizarBotao(btnLimpar, COR_VERMELHO, 12);
 
         btnLimpar.setOnAction(e -> {
-            salvarArvoreEmTxt();
             arvore = new Arvore();
             escalaAtual = 1.0;
             canvasArvore.setScaleX(1.0);
@@ -125,7 +130,7 @@ public class VisualizadorArvore extends Application {
         estilizarBotao(btnZoomOut, COR_AZUL, 12);
         btnZoomOut.setOnAction(e -> aplicarZoom(0.8));
 
-        hbox.getChildren().addAll(label, campoValor, btnInserir, btnLimpar, btnZoomIn, btnZoomOut);
+        hbox.getChildren().addAll(label, campoValor, btnInserir, btnSalvar, btnLimpar, btnZoomIn, btnZoomOut);
         return hbox;
     }
 
@@ -236,27 +241,61 @@ public class VisualizadorArvore extends Application {
     }
 
     private void salvarArvoreEmTxt() {
-        if (arvore.isEmpty()) return;
+        if (arvore.isEmpty()) {
+            mostrarErro("A árvore está vazia! Insira valores antes de salvar.");
+            return;
+        }
 
         try {
             String dataHora = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            String nomeArquivo = "arvore_" + dataHora + ".txt";
+            String nomeArquivo = "arvore_relatorio_" + dataHora + ".txt";
             File arquivo = new File(nomeArquivo);
 
             try (FileWriter writer = new FileWriter(arquivo)) {
-                writer.write("--- Estado da Árvore Binária ---\n");
-                writer.write("Valores armazenados (Ordem Crescente):\n\n");
 
-                StringBuilder sb = new StringBuilder();
-                coletarValoresEmOrdem(arvore, sb);
+                writer.write("          ÁRVORE BINÁRIA\n");
+                writer.write("================================================\n\n");
 
-                writer.write(sb.toString().trim() + "\n\n");
-                writer.write("--------------------------------\n");
+                writer.write("Representação (Parênteses Aninhados):\n");
+                writer.write(getParentesesAninhados(arvore) + "\n\n");
+
+                writer.write("Percursos:\n");
+                writer.write("Pré-ordem: " + getPreOrdem(arvore).trim() + "\n");
+                writer.write("Em-ordem:  " + getEmOrdem(arvore).trim() + "\n");
+                writer.write("Pós-ordem: " + getPosOrdem(arvore).trim() + "\n\n");
+
+                writer.write("Caminhos (Da Raiz até as Folhas):\n");
+                List<String> caminhos = new ArrayList<>();
+                getCaminhos(arvore, "", caminhos);
+                for (String c : caminhos) {
+                    writer.write(c + "\n");
+                }
+                writer.write("\n");
+
+                writer.write("Tipos de Árvore:\n");
+                int totalNos = contarNos(arvore);
+                int altura = getAltura(arvore);
+                writer.write("Estritamente Binária: " + (isEstritamenteBinaria(arvore) ? "Sim" : "Não") + "\n");
+                writer.write("Completa: " + (isCompleta(arvore, 0, totalNos) ? "Sim" : "Não") + "\n");
+                writer.write("Cheia/Perfeita: " + (totalNos == (Math.pow(2, altura + 1) - 1) ? "Sim" : "Não") + "\n\n");
+
+                writer.write("Métricas da Árvore Inteira:\n");
+                writer.write("Nível da Árvore: " + altura + "\n");
+                writer.write("Profundidade da Árvore: " + altura + "\n");
+                writer.write("Altura da Árvore: " + altura + "\n\n");
+
+                writer.write("Métricas por Nó (Valor | Nível | Profundidade | Altura):\n");
+                List<String> metricas = new ArrayList<>();
+                coletarMetricasNos(arvore, 0, metricas);
+                for (String m : metricas) {
+                    writer.write(m + "\n");
+                }
+                writer.write("\n================================================\n");
             }
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Árvore Salva");
-            alert.setHeaderText("A árvore foi salva com sucesso antes de limpar!");
+            alert.setHeaderText("Relatório salvo com sucesso!");
             alert.setContentText("Arquivo gerado: " + arquivo.getAbsolutePath());
             alert.showAndWait();
 
@@ -265,12 +304,92 @@ public class VisualizadorArvore extends Application {
         }
     }
 
-    private void coletarValoresEmOrdem(Arvore node, StringBuilder sb) {
-        if (node == null || node.isEmpty()) return;
+    private String getParentesesAninhados(Arvore node) {
+        if (node == null || node.isEmpty()) return "";
+        String result = String.valueOf(node.getFolha().getValor());
+        if (node.getEsquerda() != null || node.getDireita() != null) {
+            result += "(";
+            result += (node.getEsquerda() != null) ? getParentesesAninhados(node.getEsquerda()) : "-";
+            result += ", ";
+            result += (node.getDireita() != null) ? getParentesesAninhados(node.getDireita()) : "-";
+            result += ")";
+        }
+        return result;
+    }
 
-        coletarValoresEmOrdem(node.getEsquerda(), sb);
-        sb.append(node.getFolha().getValor()).append(" | ");
-        coletarValoresEmOrdem(node.getDireita(), sb);
+    private String getPreOrdem(Arvore node) {
+        if (node == null || node.isEmpty()) return "";
+        return node.getFolha().getValor() + " " +
+                (node.getEsquerda() != null ? getPreOrdem(node.getEsquerda()) : "") +
+                (node.getDireita() != null ? getPreOrdem(node.getDireita()) : "");
+    }
+
+    private String getEmOrdem(Arvore node) {
+        if (node == null || node.isEmpty()) return "";
+        return (node.getEsquerda() != null ? getEmOrdem(node.getEsquerda()) : "") +
+                node.getFolha().getValor() + " " +
+                (node.getDireita() != null ? getEmOrdem(node.getDireita()) : "");
+    }
+
+    private String getPosOrdem(Arvore node) {
+        if (node == null || node.isEmpty()) return "";
+        return (node.getEsquerda() != null ? getPosOrdem(node.getEsquerda()) : "") +
+                (node.getDireita() != null ? getPosOrdem(node.getDireita()) : "") +
+                node.getFolha().getValor() + " ";
+    }
+
+    private void getCaminhos(Arvore node, String caminhoAtual, List<String> caminhos) {
+        if (node == null || node.isEmpty()) return;
+        caminhoAtual += node.getFolha().getValor();
+        if (node.getEsquerda() == null && node.getDireita() == null) {
+            caminhos.add(caminhoAtual);
+        } else {
+            caminhoAtual += " -> ";
+            if (node.getEsquerda() != null) getCaminhos(node.getEsquerda(), caminhoAtual, caminhos);
+            if (node.getDireita() != null) getCaminhos(node.getDireita(), caminhoAtual, caminhos);
+        }
+    }
+
+    private int contarNos(Arvore node) {
+        if (node == null || node.isEmpty()) return 0;
+        int esq = node.getEsquerda() != null ? contarNos(node.getEsquerda()) : 0;
+        int dir = node.getDireita() != null ? contarNos(node.getDireita()) : 0;
+        return 1 + esq + dir;
+    }
+
+    private int getAltura(Arvore node) {
+        if (node == null || node.isEmpty()) return -1;
+        int esq = node.getEsquerda() != null ? getAltura(node.getEsquerda()) : -1;
+        int dir = node.getDireita() != null ? getAltura(node.getDireita()) : -1;
+        return Math.max(esq, dir) + 1;
+    }
+
+    private boolean isEstritamenteBinaria(Arvore node) {
+        if (node == null || node.isEmpty()) return true;
+        boolean temEsq = node.getEsquerda() != null;
+        boolean temDir = node.getDireita() != null;
+        if (temEsq ^ temDir) return false;
+        boolean esqValida = !temEsq || isEstritamenteBinaria(node.getEsquerda());
+        boolean dirValida = !temDir || isEstritamenteBinaria(node.getDireita());
+        return esqValida && dirValida;
+    }
+
+    private boolean isCompleta(Arvore node, int index, int countNos) {
+        if (node == null || node.isEmpty()) return true;
+        if (index >= countNos) return false;
+        boolean esqCompleta = node.getEsquerda() == null || isCompleta(node.getEsquerda(), 2 * index + 1, countNos);
+        boolean dirCompleta = node.getDireita() == null || isCompleta(node.getDireita(), 2 * index + 2, countNos);
+        return esqCompleta && dirCompleta;
+    }
+
+    private void coletarMetricasNos(Arvore node, int profundidade, List<String> metricas) {
+        if (node == null || node.isEmpty()) return;
+        int alturaNo = getAltura(node);
+        metricas.add(String.format("Nó %3d | Nível: %2d | Profundidade: %2d | Altura: %2d",
+                node.getFolha().getValor(), profundidade, profundidade, alturaNo));
+
+        if (node.getEsquerda() != null) coletarMetricasNos(node.getEsquerda(), profundidade + 1, metricas);
+        if (node.getDireita() != null) coletarMetricasNos(node.getDireita(), profundidade + 1, metricas);
     }
 
     private void mostrarErro(String msg) {

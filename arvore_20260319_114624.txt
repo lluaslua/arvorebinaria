@@ -1,6 +1,0 @@
---- Estado da Árvore Binária ---
-Valores armazenados (Ordem Crescente):
-
--20 | -2 | -1 | 5 | 6 | 8 | 11 | 12 | 20 |
-
---------------------------------
