@@ -272,12 +272,11 @@ public class VisualizadorArvore extends Application {
                 }
                 writer.write("\n");
 
-                writer.write("Tipos de Árvore:\n");
+                writer.write("Tipo de Árvore:\n");
                 int totalNos = contarNos(arvore);
                 int altura = getAltura(arvore);
-                writer.write("Estritamente Binária: " + (isEstritamenteBinaria(arvore) ? "Sim" : "Não") + "\n");
                 writer.write("Completa: " + (isCompleta(arvore, 0, totalNos) ? "Sim" : "Não") + "\n");
-                writer.write("Cheia/Perfeita: " + (totalNos == (Math.pow(2, altura + 1) - 1) ? "Sim" : "Não") + "\n\n");
+                writer.write("Cheia: " + (totalNos == (Math.pow(2, altura + 1) - 1) ? "Sim" : "Não") + "\n\n");
 
                 writer.write("Métricas da Árvore Inteira:\n");
                 writer.write("Nível da Árvore: " + altura + "\n");
