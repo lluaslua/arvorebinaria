@@ -59,7 +59,7 @@ public class VisualizadorArvore extends Application {
         scrollPane = new ScrollPane(grupoZoom);
         scrollPane.setPannable(true);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background: " + COR_FUNDO + ";");
-        scrollPane.setFitToWidth(false);
+        scrollPane.setFitToWidth(true); // Garante que respeite a largura da tela
 
         scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
             if (event.isControlDown()) {
@@ -175,51 +175,58 @@ public class VisualizadorArvore extends Application {
 
         int profundidade = obterProfundidade(arvore);
 
-        double gapHorizontalMinimo = 65.0;
-
-        double larguraNecessaria = Math.pow(2, profundidade - 1) * gapHorizontalMinimo;
-
         double larguraViewport = scrollPane.getViewportBounds().getWidth();
-        if (larguraViewport <= 0) larguraViewport = 900;
+        if (larguraViewport <= 0) larguraViewport = 900; // Valor padrão antes da interface carregar
 
-        double larguraFinal = Math.max(larguraNecessaria, larguraViewport);
-        double alturaFinal = Math.max(profundidade * 85 + 100, scrollPane.getViewportBounds().getHeight());
+        // Calcula uma largura compacta baseada na profundidade, mas limitada ao tamanho da tela (com margem)
+        double margem = 80.0;
+        double larguraCalculada = Math.pow(2, profundidade) * 25.0;
+        double larguraEfetiva = Math.min(larguraViewport - margem, larguraCalculada);
+
+        // O gap inicial garante que as ligações sejam menores para árvores pequenas e limitadas na tela
+        double gapInicial = larguraEfetiva / 4.0;
+
+        // Mantém a largura baseada estritamente no viewport para ficar centralizado
+        double larguraFinal = larguraViewport;
+        double alturaFinal = Math.max(profundidade * 50 + 100, scrollPane.getViewportBounds().getHeight());
 
         canvasArvore.setPrefSize(larguraFinal, alturaFinal);
 
-        exibirNo(arvore, larguraFinal / 2, 60, larguraFinal / 4);
+        // Inicia no centro da tela, um pouco mais acima
+        exibirNo(arvore, larguraFinal / 2, 40, gapInicial);
     }
 
     private void exibirNo(Arvore node, double x, double y, double gap) {
         if (node.getEsquerda() != null) {
-            Line linha = new Line(x, y, x - gap, y + 80);
+            Line linha = new Line(x, y, x - gap, y + 50);
             linha.setStroke(Color.web("#CBD5E1"));
             linha.setStrokeWidth(2);
             canvasArvore.getChildren().add(linha);
-            exibirNo(node.getEsquerda(), x - gap, y + 80, gap / 2);
+            exibirNo(node.getEsquerda(), x - gap, y + 50, gap / 2);
         }
 
         if (node.getDireita() != null) {
-            Line linha = new Line(x, y, x + gap, y + 80);
+            Line linha = new Line(x, y, x + gap, y + 50);
             linha.setStroke(Color.web("#CBD5E1"));
             linha.setStrokeWidth(2);
             canvasArvore.getChildren().add(linha);
-            exibirNo(node.getDireita(), x + gap, y + 80, gap / 2);
+            exibirNo(node.getDireita(), x + gap, y + 50, gap / 2);
         }
 
-        Circle circulo = new Circle(x, y, 22);
+        // Círculo menor para uma estética mais compacta
+        Circle circulo = new Circle(x, y, 18);
         circulo.setFill(Color.WHITE);
         circulo.setStroke(Color.web(COR_VERDE));
         circulo.setStrokeWidth(3);
         circulo.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 3);");
 
         Text texto = new Text(String.valueOf(node.getFolha().getValor()));
-        texto.setFont(Font.font("System", FontWeight.BOLD, 14));
+        texto.setFont(Font.font("System", FontWeight.BOLD, 12));
         texto.setFill(Color.web(COR_TEXTO));
 
         double textWidth = texto.getLayoutBounds().getWidth();
         texto.setX(x - (textWidth / 2));
-        texto.setY(y + 5);
+        texto.setY(y + 4);
 
         canvasArvore.getChildren().addAll(circulo, texto);
 
