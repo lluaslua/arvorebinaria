@@ -59,7 +59,7 @@ public class VisualizadorArvore extends Application {
         scrollPane = new ScrollPane(grupoZoom);
         scrollPane.setPannable(true);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background: " + COR_FUNDO + ";");
-        scrollPane.setFitToWidth(true); // Garante que respeite a largura da tela
+        scrollPane.setFitToWidth(true);
 
         scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
             if (event.isControlDown()) {
@@ -176,23 +176,23 @@ public class VisualizadorArvore extends Application {
         int profundidade = obterProfundidade(arvore);
 
         double larguraViewport = scrollPane.getViewportBounds().getWidth();
-        if (larguraViewport <= 0) larguraViewport = 900; // Valor padrão antes da interface carregar
+        if (larguraViewport <= 0) larguraViewport = 900;
 
-        // Calcula uma largura compacta baseada na profundidade, mas limitada ao tamanho da tela (com margem)
+
         double margem = 80.0;
         double larguraCalculada = Math.pow(2, profundidade) * 25.0;
         double larguraEfetiva = Math.min(larguraViewport - margem, larguraCalculada);
 
-        // O gap inicial garante que as ligações sejam menores para árvores pequenas e limitadas na tela
+
         double gapInicial = larguraEfetiva / 4.0;
 
-        // Mantém a largura baseada estritamente no viewport para ficar centralizado
+
         double larguraFinal = larguraViewport;
         double alturaFinal = Math.max(profundidade * 50 + 100, scrollPane.getViewportBounds().getHeight());
 
         canvasArvore.setPrefSize(larguraFinal, alturaFinal);
 
-        // Inicia no centro da tela, um pouco mais acima
+
         exibirNo(arvore, larguraFinal / 2, 40, gapInicial);
     }
 
@@ -213,7 +213,7 @@ public class VisualizadorArvore extends Application {
             exibirNo(node.getDireita(), x + gap, y + 50, gap / 2);
         }
 
-        // Círculo menor para uma estética mais compacta
+
         Circle circulo = new Circle(x, y, 18);
         circulo.setFill(Color.WHITE);
         circulo.setStroke(Color.web(COR_VERDE));
