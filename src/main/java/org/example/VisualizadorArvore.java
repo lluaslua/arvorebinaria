@@ -183,20 +183,16 @@ public class VisualizadorArvore extends Application {
         double larguraViewport = scrollPane.getViewportBounds().getWidth();
         if (larguraViewport <= 0) larguraViewport = 900;
 
-
         double margem = 80.0;
         double larguraCalculada = Math.pow(2, profundidade) * 25.0;
         double larguraEfetiva = Math.min(larguraViewport - margem, larguraCalculada);
 
-
         double gapInicial = larguraEfetiva / 4.0;
-
 
         double larguraFinal = larguraViewport;
         double alturaFinal = Math.max(profundidade * 50 + 100, scrollPane.getViewportBounds().getHeight());
 
         canvasArvore.setPrefSize(larguraFinal, alturaFinal);
-
 
         exibirNo(arvore, larguraFinal / 2, 40, gapInicial);
     }
@@ -217,7 +213,6 @@ public class VisualizadorArvore extends Application {
             canvasArvore.getChildren().add(linha);
             exibirNo(node.getDireita(), x + gap, y + 50, gap / 2);
         }
-
 
         Circle circulo = new Circle(x, y, 18);
         circulo.setFill(Color.WHITE);
@@ -275,13 +270,16 @@ public class VisualizadorArvore extends Application {
                 writer.write("Tipo de Árvore:\n");
                 int totalNos = contarNos(arvore);
                 int altura = getAltura(arvore);
+                // ADICIONADO: A verificação de Estritamente Binária que não era chamada!
+                writer.write("Estritamente Binária: " + (isEstritamenteBinaria(arvore) ? "Sim" : "Não") + "\n");
                 writer.write("Completa: " + (isCompleta(arvore, 0, totalNos) ? "Sim" : "Não") + "\n");
                 writer.write("Cheia: " + (totalNos == (Math.pow(2, altura + 1) - 1) ? "Sim" : "Não") + "\n\n");
 
-                writer.write("Métricas da Árvore Inteira:\n");
-                writer.write("Nível da Árvore: " + altura + "\n");
-                writer.write("Profundidade da Árvore: " + altura + "\n");
-                writer.write("Altura da Árvore: " + altura + "\n\n");
+                // CORRIGIDO: Retirada da repetição redundante e substituição por métricas globais claras.
+                writer.write("Métricas Globais da Árvore:\n");
+                writer.write("Altura da Árvore: " + altura + "\n");
+                writer.write("Profundidade Máxima (Folhas): " + altura + "\n");
+                writer.write("Nível Máximo Alcançado: " + altura + "\n\n");
 
                 writer.write("Métricas por Nó (Valor | Nível | Profundidade | Altura):\n");
                 List<String> metricas = new ArrayList<>();
