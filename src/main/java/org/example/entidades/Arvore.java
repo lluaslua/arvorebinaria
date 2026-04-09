@@ -43,7 +43,7 @@ public class Arvore {
                 } else {
                     this.esquerda.inserir(novo);
                 }
-            } else if (novo.getValor() > this.folha.getValor()) {
+            } else {
                 if (this.direita == null) {
                     this.direita = new Arvore(novo);
                 } else {
@@ -51,5 +51,37 @@ public class Arvore {
                 }
             }
         }
+    }
+
+    public void inverterNos() {
+        if (isEmpty()) {
+            return;
+        }
+        Arvore temp = this.esquerda;
+        this.esquerda = this.direita;
+        this.direita = temp;
+
+        if (this.esquerda != null) {
+            this.esquerda.inverterNos();
+        }
+        if (this.direita != null) {
+            this.direita.inverterNos();
+        }
+    }
+
+    public String imprimirArvore() {
+        if (isEmpty()) {
+            return "(vazia)";
+        }
+        return imprimirArvore(this);
+    }
+
+    private String imprimirArvore(Arvore no) {
+        if (no == null || no.isEmpty()) {
+            return "-";
+        }
+        String esquerdaStr = imprimirArvore(no.esquerda);
+        String direitaStr = imprimirArvore(no.direita);
+        return no.folha.getValor() + "(" + esquerdaStr + ", " + direitaStr + ")";
     }
 }

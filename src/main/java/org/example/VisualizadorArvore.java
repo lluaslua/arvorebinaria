@@ -111,6 +111,10 @@ public class VisualizadorArvore extends Application {
         estilizarBotao(btnSalvar, COR_VERDE, 12);
         btnSalvar.setOnAction(e -> salvarArvoreEmTxt());
 
+        Button btnInverter = new Button("Inverter");
+        estilizarBotao(btnInverter, COR_AZUL, 12);
+        btnInverter.setOnAction(e -> acaoInverter());
+
         Button btnLimpar = new Button("Limpar");
         estilizarBotao(btnLimpar, COR_VERMELHO, 12);
 
@@ -130,7 +134,7 @@ public class VisualizadorArvore extends Application {
         estilizarBotao(btnZoomOut, COR_AZUL, 12);
         btnZoomOut.setOnAction(e -> aplicarZoom(0.8));
 
-        hbox.getChildren().addAll(label, campoValor, btnInserir, btnSalvar, btnLimpar, btnZoomIn, btnZoomOut);
+        hbox.getChildren().addAll(label, campoValor, btnInserir, btnSalvar, btnInverter, btnLimpar, btnZoomIn, btnZoomOut);
         return hbox;
     }
 
@@ -165,6 +169,16 @@ public class VisualizadorArvore extends Application {
         } catch (NumberFormatException ex) {
             mostrarErro("Digite um número válido!");
         }
+    }
+
+    private void acaoInverter() {
+        if (arvore.isEmpty()) {
+            mostrarErro("A árvore está vazia! Insira valores antes de inverter.");
+            return;
+        }
+        arvore.inverterNos();
+        desenharArvore();
+        System.out.println("Árvore invertida: " + arvore.imprimirArvore());
     }
 
     private int obterProfundidade(Arvore no) {
@@ -255,9 +269,9 @@ public class VisualizadorArvore extends Application {
                 writer.write(getParentesesAninhados(arvore) + "\n\n");
 
                 writer.write("Percursos:\n");
-                writer.write("Pré-ordem: " + getPreOrdem(arvore).trim() + "\n");
-                writer.write("Em-ordem:  " + getEmOrdem(arvore).trim() + "\n");
-                writer.write("Pós-ordem: " + getPosOrdem(arvore).trim() + "\n\n");
+                writer.write("NLR(Pré-ordem): " + getPreOrdem(arvore).trim() + "\n");
+                writer.write("LNR(Em-ordem):  " + getEmOrdem(arvore).trim() + "\n");
+                writer.write("LRN(Pós-ordem): " + getPosOrdem(arvore).trim() + "\n\n");
 
                 writer.write("Caminhos (Da Raiz até as Folhas):\n");
                 List<String> caminhos = new ArrayList<>();
