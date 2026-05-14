@@ -542,4 +542,3 @@ public class VisualizadorArvore extends Application {
         launch(args);
     }
 }
-}

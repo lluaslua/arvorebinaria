@@ -81,6 +81,16 @@ public class ArvoreAVL implements InterfaceArvore {
             return y;
         }
 
+        private ArvoreAVL rotacaoDuplaEsquerdaDireita(ArvoreAVL no) {
+            no.esquerda = rotacaoEsquerda(no.esquerda);
+            return rotacaoDireita(no);
+        }
+
+        private ArvoreAVL rotacaoDuplaDireitaEsquerda(ArvoreAVL no) {
+            no.direita = rotacaoDireita(no.direita);
+            return rotacaoEsquerda(no);
+        }
+
         private void imprimirRotacao(String tipo, int noDesbalanceado) {
             String msg = "Rotação " + tipo + " no nó " + noDesbalanceado;
             System.out.println("[AVL] " + msg);
@@ -127,15 +137,13 @@ public class ArvoreAVL implements InterfaceArvore {
 
             if (balance > 1 && novo.getValor() > this.esquerda.folha.getValor()) {
                 imprimirRotacao("Dupla Esquerda-Direita (LR)", this.folha.getValor());
-                this.esquerda = rotacaoEsquerda(this.esquerda);
-                return rotacaoDireita(this);
+                return rotacaoDuplaEsquerdaDireita(this);
             }
 
 
             if (balance < -1 && novo.getValor() < this.direita.folha.getValor()) {
                 imprimirRotacao("Dupla Direita-Esquerda (RL)", this.folha.getValor());
-                this.direita = rotacaoDireita(this.direita);
-                return rotacaoEsquerda(this);
+                return rotacaoDuplaDireitaEsquerda(this);
             }
 
             return this;
