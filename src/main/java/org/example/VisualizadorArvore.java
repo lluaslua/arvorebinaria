@@ -44,6 +44,7 @@ public class VisualizadorArvore extends Application {
     private double escalaAtual = 1.0;
     private boolean isAVL = false;
     private Stage primaryStage;
+    private javafx.scene.control.TextArea areaLogs;
 
     private final String COR_VERDE = "#10B981";
     private final String COR_VERMELHO = "#F43F5E";
@@ -144,6 +145,11 @@ public class VisualizadorArvore extends Application {
 
         root.setCenter(scrollPane);
 
+        if (isAVL) {
+            javafx.scene.layout.VBox painelLog = criarPainelLog();
+            root.setBottom(painelLog);
+        }
+
         Scene scene = new Scene(root, 900, 700);
 
         scene.widthProperty().addListener((obs, oldVal, newVal) -> desenharArvore());
@@ -151,6 +157,44 @@ public class VisualizadorArvore extends Application {
 
         primaryStage.setTitle("Visualizador - " + (isAVL ? "Árvore AVL" : "Árvore Binária de Busca"));
         primaryStage.setScene(scene);
+    }
+
+    private javafx.scene.layout.VBox criarPainelLog() {
+        javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(8);
+        vbox.setPadding(new Insets(12, 20, 14, 20));
+        vbox.setStyle(
+                "-fx-background-color: linear-gradient(to right, #0F172A, #111827);" +
+                "-fx-border-color: #334155;" +
+                "-fx-border-width: 1 0 0 0;"
+        );
+
+        Label titulo = new Label("Rotações AVL");
+        titulo.setFont(Font.font("System", FontWeight.BOLD, 14));
+        titulo.setTextFill(Color.web("#E2E8F0"));
+
+        areaLogs = new javafx.scene.control.TextArea();
+        areaLogs.setEditable(false);
+        areaLogs.setWrapText(true);
+        areaLogs.setPrefHeight(120);
+        areaLogs.setPromptText("Nenhuma rotação realizada ainda.");
+        areaLogs.setStyle(
+                "-fx-control-inner-background: #020617;" +
+                "-fx-text-fill: #22C55E;" +
+                "-fx-highlight-fill: #334155;" +
+                "-fx-highlight-text-fill: #F8FAFC;" +
+                "-fx-font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;" +
+                "-fx-font-size: 14px;" +
+                "-fx-background-color: #020617;" +
+                "-fx-background-insets: 0;" +
+                "-fx-background-radius: 10;" +
+                "-fx-border-color: #334155;" +
+                "-fx-border-radius: 10;" +
+                "-fx-border-width: 1;" +
+                "-fx-padding: 10;"
+        );
+
+        vbox.getChildren().addAll(titulo, areaLogs);
+        return vbox;
     }
 
     private HBox criarPainelControle() {
@@ -190,6 +234,10 @@ public class VisualizadorArvore extends Application {
             escalaAtual = 1.0;
             canvasArvore.setScaleX(1.0);
             canvasArvore.setScaleY(1.0);
+            if (isAVL) {
+                ArvoreAVL.limparLogs();
+                if (areaLogs != null) areaLogs.clear();
+            }
             desenharArvore();
         });
 
@@ -229,17 +277,32 @@ public class VisualizadorArvore extends Application {
     private void acaoInserir() {
         try {
             int val = Integer.parseInt(campoValor.getText());
-            if (arvore == null) {
 
+            if (isAVL) {
+                ArvoreAVL.limparLogs();
+            }
+
+            if (arvore == null) {
                 if (isAVL) {
                     arvore = new ArvoreAVL(new Folha(val));
                 } else {
                     arvore = new ArvoreDeBusca(new Folha(val));
                 }
             } else {
-
                 arvore = arvore.inserir(new Folha(val));
             }
+
+            if (isAVL && areaLogs != null) {
+                List<String> rotacoes = ArvoreAVL.getLogs();
+                if (rotacoes.isEmpty()) {
+                    areaLogs.appendText("Inserção de " + val + ": sem rotação necessária.\n");
+                } else {
+                    for (String r : rotacoes) {
+                        areaLogs.appendText("Inserção de " + val + ": " + r + "\n");
+                    }
+                }
+            }
+
             desenharArvore();
             campoValor.clear();
             campoValor.requestFocus();
@@ -478,4 +541,5 @@ public class VisualizadorArvore extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+}
 }

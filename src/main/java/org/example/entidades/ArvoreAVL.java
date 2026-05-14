@@ -1,9 +1,21 @@
 package org.example.entidades;
 
-
 import org.example.interfaces.InterfaceArvore;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ArvoreAVL implements InterfaceArvore {
+
+        private static final List<String> logs = new ArrayList<>();
+
+        public static List<String> getLogs() {
+            return new ArrayList<>(logs);
+        }
+
+        public static void limparLogs() {
+            logs.clear();
+        }
         private Folha folha;
         private ArvoreAVL esquerda;
         private ArvoreAVL direita;
@@ -69,6 +81,12 @@ public class ArvoreAVL implements InterfaceArvore {
             return y;
         }
 
+        private void imprimirRotacao(String tipo, int noDesbalanceado) {
+            String msg = "Rotação " + tipo + " no nó " + noDesbalanceado;
+            System.out.println("[AVL] " + msg);
+            logs.add(msg);
+        }
+
         @Override
         public InterfaceArvore inserir(Folha novo) {
 
@@ -96,22 +114,26 @@ public class ArvoreAVL implements InterfaceArvore {
 
 
             if (balance > 1 && novo.getValor() < this.esquerda.folha.getValor()) {
+                imprimirRotacao("Simples Direita (LL)", this.folha.getValor());
                 return rotacaoDireita(this);
             }
 
 
             if (balance < -1 && novo.getValor() > this.direita.folha.getValor()) {
+                imprimirRotacao("Simples Esquerda (RR)", this.folha.getValor());
                 return rotacaoEsquerda(this);
             }
 
 
             if (balance > 1 && novo.getValor() > this.esquerda.folha.getValor()) {
+                imprimirRotacao("Dupla Esquerda-Direita (LR)", this.folha.getValor());
                 this.esquerda = rotacaoEsquerda(this.esquerda);
                 return rotacaoDireita(this);
             }
 
 
             if (balance < -1 && novo.getValor() < this.direita.folha.getValor()) {
+                imprimirRotacao("Dupla Direita-Esquerda (RL)", this.folha.getValor());
                 this.direita = rotacaoDireita(this.direita);
                 return rotacaoEsquerda(this);
             }
